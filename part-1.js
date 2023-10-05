@@ -62,7 +62,7 @@ function gamePlay(grid) {
 }
 
 function battleship(grid) {
-  rs.question(`Press any key to start the game!`);
+  rs.keyIn(`Press any key to start the game!`);
   firstShip = setGrid(grid);
   secondShip = setGrid(grid);
   return gamePlay(grid);
