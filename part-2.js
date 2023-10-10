@@ -1,17 +1,20 @@
 const rs = require('readline-sync');
-let grid = [];
 
+let grid = [];
 let gridPlacementTracker = [];
 let guessTracker = [];
-let shipsRemaining = 2;
-let firstShip = "";
-let secondShip = "";
+let remainingShips = 5;
+let firstShipUnits = 2
+let secondShipUnits = 3;
+let thirdShipUnits = 3;
+let fourthShipUnits = 4;
+let fifthShipUnits = 5;
 
-function gridBuilder(num) {
+const gridBuilder = (num) => {
   const yAxis = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  let yAxisSliced = yAxis.slice(0, num);
+  const yAxisSliced = yAxis.slice(0, num);
   for (let letter of yAxisSliced) {
-    let row = []
+    const row = []
     for (let x = 1; x <= num; x++) {
       row.push(letter + x);
     }
@@ -19,24 +22,19 @@ function gridBuilder(num) {
   }
 }
 
-function setShip(grid, units, gridPlacementTracker) {
+const setShip = (units) => {
   const shipPlacement = [];
-  let availableGrid = [];
-  
   //set random ship location
-  let yAxis = gridLocation(grid);
-  let xAxis = gridLocation(grid);
+  const yAxis = gridLocation(grid.length);
+  const xAxis = gridLocation(grid.length);
   shipPlacement.push(grid[yAxis][xAxis]);
- 
-  //set random ship direction on available grid
-  //determine rest of ship location
-  shipCoordinates(grid, yAxis, xAxis, units, shipPlacement);
-
+  //set random ship direction & determine rest of ship location
+  shipCoordinates(yAxis, xAxis, units, shipPlacement);
   //check if ship intersects other ships
   for (let ships of gridPlacementTracker) {
     for (let i = 0; i < shipPlacement.length; i++) {
       if (ships.includes(shipPlacement[i])) {
-        return setShip(grid, units, gridPlacementTracker);
+        return setShip(units);
       }
     }
   }
@@ -44,8 +42,10 @@ function setShip(grid, units, gridPlacementTracker) {
   return shipPlacement;
   }
 
-function shipCoordinates(grid, yAxis, xAxis, units, shipPlacement) {
-    let direction = Math.floor(Math.random() * 4);
+const gridLocation = (num) => Math.floor(Math.random() * num);
+
+const shipCoordinates = (yAxis, xAxis, units, shipPlacement) => {
+    let direction = gridLocation(4);
     for (let i = 1; i < units; i++) {
       if (direction === 0 && (yAxis + 1) >= units) {
         //up
@@ -60,78 +60,92 @@ function shipCoordinates(grid, yAxis, xAxis, units, shipPlacement) {
        //left
        shipPlacement.push(grid[yAxis][xAxis - i])
       } else {
-        return shipCoordinates(grid, yAxis, xAxis, units, shipPlacement); 
+        return shipCoordinates(yAxis, xAxis, units, shipPlacement); 
       }
   }
   return shipPlacement;
 }
 
-
-function gridLocation(grid) {
-  return Math.floor(Math.random() * grid.length);
-}
-
-
-
-function resetGrid() {
-  grid = [];
-  gridPlacementTracker = [];
-  guessTracker = [];
-  shipsRemaining = 2;
-}
-
-function playerGuess(grid) {
+const playerGuess = () => {
   return rs.question(`Enter a location to strike, i.e. 'A2': `, {
     limit: grid,
-    limitMessage: `That is not a valid location`
+    limitMessage: `That is not a valid location`,
+    caseSensitive: true
   });
 }
 
-function guessResult(guess) {
+const guessResult = (guess) => {
+  const [first, second, third, fourth, fifth] = gridPlacementTracker;
   if (guessTracker.includes(guess)) {
     console.log(`You have already picked this location. Miss!`);
-  } else if (guess === firstShip || guess === secondShip) {
-    shipsRemaining -= 1;
-    if (shipsRemaining === 1) {
-      console.log(`Hit! You have sunk a battleship. 1 ship remaining.`);
-    } else {
-      console.log(`You have destroyed all battleships!`)
-    }
+  } else if (first.includes(guess)) {
+      firstShipUnits = hitShip(firstShipUnits);
+  } else if (second.includes(guess)) {
+      secondShipUnits = hitShip(secondShipUnits);
+  } else if (third.includes(guess)) {
+      thirdShipUnits = hitShip(thirdShipUnits);
+  } else if (fourth.includes(guess)) {
+      fourthShipUnits = hitShip(fourthShipUnits);
+  } else if (fifth.includes(guess)) {
+      fifthShipUnits = hitShip(fifthShipUnits);
   } else {
-    console.log(`You have missed!`);
+      console.log(`Miss!`);
   }
   if (!guessTracker.includes(guess)) {
     guessTracker.push(guess);
   }
+  return remainingShips;
 }
 
-function gamePlay(grid) {
-  let guess = playerGuess(grid);
-  guessResult(guess);
-  if (shipsRemaining > 0) {
-    return gamePlay(grid);
-  } else {
-    if (rs.keyInYN(`Would you like to play again?`)) {
-      resetGrid();
-      return battleship(grid);
+const hitShip = (shipUnits) => {
+  shipUnits -= 1;
+  shipUnits === 0 ? sunkenShip() : console.log(`Hit!`);
+  return shipUnits;
+}
+
+
+const sunkenShip = () => {
+  remainingShips -= 1;
+  remainingShips === 1 ? console.log(`Hit! You have sunk a battleship. You have ${remainingShips} remaining ship.`) 
+                       : console.log(`Hit! You have sunk a battleship. You have ${remainingShips} remaining ships.`);
+  return remainingShips;
+}
+
+const resetGrid = () => {
+  grid = [];
+  gridPlacementTracker = [];
+  guessTracker = [];
+  remainingShips = 5;
+  firstShipUnits = 2
+  secondShipUnits = 3;
+  thirdShipUnits = 3;
+  fourthShipUnits = 4;
+  fifthShipUnits = 5;
+  return battleship();
+}
+
+const gamePlay = () => {
+  let guess = playerGuess();
+  let ships = guessResult(guess);
+  if (ships === 0) {
+    if (rs.keyInYN(`You have destroyed all battleships. Would you like to play again?`)) {
+      return resetGrid();
     }
+  } else {
+    return gamePlay();
   }
 }
 
-function battleship(grid) {
+const battleship = () => {
   rs.keyIn(`Press any key to start the game!`);
   gridBuilder(10);
-  firstShip = setShip(grid, 2, gridPlacementTracker);
-  console.log(`ship: ${firstShip}`);
-  secondShip = setShip(grid, 3, gridPlacementTracker);
-  console.log(`ship: ${secondShip}`);
-  thirdShip = setShip(grid, 3, gridPlacementTracker);
-  console.log(`ship: ${thirdShip}`);
-  fourthShip = setShip(grid, 4, gridPlacementTracker);
-  console.log(`ship: ${fourthShip}`);
-  fifthShip = setShip(grid, 5, gridPlacementTracker);
-  console.log(`ship: ${fifthShip}`);
-  return gamePlay(grid);
+  console.log(setShip(2));
+  console.log(setShip(3));
+  console.log(setShip(3));
+  console.log(setShip(4));
+  console.log(setShip(5));
+                                                                                  
+  return gamePlay();
 }
 
-battleship(grid);
+battleship();

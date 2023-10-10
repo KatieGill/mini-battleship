@@ -1,4 +1,5 @@
 const rs = require('readline-sync');
+
 const grid = ['A1', 'A2', 'A3', 'B1', 'B2', 'B3', 'C1', 'C2', 'C3'];
 let gridPlacementTracker = [];
 let guessTracker = [];
@@ -6,66 +7,64 @@ let shipsRemaining = 2;
 let firstShip = "";
 let secondShip = "";
 
-
-function setGrid(grid) {
+const setGrid = () => {
   let gridPlacement = grid[Math.floor(Math.random() * grid.length)];
   if (gridPlacementTracker.includes(gridPlacement)) {
-    setGrid(grid)
+    return setGrid();
   } else {
     gridPlacementTracker.push(gridPlacement);
     return gridPlacement;
   }
 }
 
-function resetGrid() {
+const resetGrid = () => {
   gridPlacementTracker = [];
   guessTracker = [];
   shipsRemaining = 2;
+  return battleship();
 }
 
-function playerGuess(grid) {
+const playerGuess = () => {
   return rs.question(`Enter a location to strike, i.e. 'A2': `, {
     limit: grid,
-    limitMessage: `That is not a valid location`
+    limitMessage: `That is not a valid location`,
+    caseSensitive: true
   });
 }
 
-function guessResult(guess) {
+const guessResult = (guess) => {
   if (guessTracker.includes(guess)) {
     console.log(`You have already picked this location. Miss!`);
   } else if (guess === firstShip || guess === secondShip) {
     shipsRemaining -= 1;
-    if (shipsRemaining === 1) {
-      console.log(`Hit! You have sunk a battleship. 1 ship remaining.`);
+    shipsRemaining === 1 ? console.log(`Hit! You have sunk a battleship. 1 ship remaining.`)
+                         : console.log(`You have destroyed all battleships!`); 
     } else {
-      console.log(`You have destroyed all battleships!`)
-    }
-  } else {
     console.log(`You have missed!`);
   }
   if (!guessTracker.includes(guess)) {
     guessTracker.push(guess);
   }
+  return shipsRemaining;
 }
 
-function gamePlay(grid) {
+const gamePlay = () => {
   let guess = playerGuess(grid);
   guessResult(guess);
   if (shipsRemaining > 0) {
-    return gamePlay(grid);
+    return gamePlay();
   } else {
     if (rs.keyInYN(`Would you like to play again?`)) {
-      resetGrid();
-      return battleship(grid);
+      return resetGrid();
     }
   }
 }
 
-function battleship(grid) {
+const battleship = () => {
   rs.keyIn(`Press any key to start the game!`);
-  firstShip = setGrid(grid);
-  secondShip = setGrid(grid);
-  return gamePlay(grid);
+  firstShip = setGrid();
+  secondShip = setGrid();
+  return gamePlay();
 }
 
-battleship(grid);
+battleship();
