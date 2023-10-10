@@ -10,53 +10,71 @@ let secondShip = "";
 function gridBuilder(num) {
   const yAxis = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   let yAxisSliced = yAxis.slice(0, num);
-  for (let char of yAxisSliced) {
-    const xAxis = []
-    for (let i = 1; i <= num; i++) {
-      xAxis.push(char + i);
+  for (let letter of yAxisSliced) {
+    let row = []
+    for (let x = 1; x <= num; x++) {
+      row.push(letter + x);
     }
-    grid.push(xAxis);
+    grid.push(row);
   }
 }
 
-function setShip(grid, units) {
-  let availableGrid = [...grid];
-  let shipPlacement = [];
-  let shipLength = units;
-  const leftGridLimit = /1$/;
-  const rightGridLimit = /10/;
-
-  while (shipLength > 0) {
-    let gridPlacement = availableGrid[Math.floor(Math.random() * availableGrid.length)][Math.floor(Math.random() * availableGrid.length)];
-    if (gridPlacementTracker.includes(gridPlacement)) {
-      return setShip(grid, units);
-    }
+function setShip(grid, units, gridPlacementTracker) {
+  const shipPlacement = [];
+  let availableGrid = [];
   
-  if (leftGridLimit.test(gridPlacement)) {
-    availableGrid = availableGrid.slice(availableGrid.indexOf(gridPlacement) - (10), availableGrid.indexOf(gridPlacement) + (10 + 2));
-    availableGrid.splice(2, (10 - 2));
-    availableGrid.splice(4, (10 - 2));
-  } else if (rightGridLimit.test(gridPlacement)) {
-    availableGrid = availableGrid.slice(availableGrid.indexOf(gridPlacement) - (10 + 1), availableGrid.indexOf(gridPlacement) + (10 + 1));
-    availableGrid.splice(2, (10 - 2));
-    availableGrid.splice(4, (10 - 2));
-  } else {
-    availableGrid = availableGrid.slice(availableGrid.indexOf(gridPlacement) - (10 + 1), availableGrid.indexOf(gridPlacement) + (10 + 2));
-    availableGrid.splice(3, (10 - 3));
-    availableGrid.splice(6, (10 - 3));
+  //set random ship location
+  let yAxis = gridLocation(grid);
+  let xAxis = gridLocation(grid);
+  shipPlacement.push(grid[yAxis][xAxis]);
+ 
+  //set random ship direction on available grid
+  //determine rest of ship location
+  shipCoordinates(grid, yAxis, xAxis, units, shipPlacement);
+
+  //check if ship intersects other ships
+  for (let ships of gridPlacementTracker) {
+    for (let i = 0; i < shipPlacement.length; i++) {
+      if (ships.includes(shipPlacement[i])) {
+        return setShip(grid, units, gridPlacementTracker);
+      }
+    }
+  }
+  gridPlacementTracker.push(shipPlacement);
+  return shipPlacement;
   }
 
-    gridPlacementTracker.push(gridPlacement);
-    shipPlacement.push(gridPlacement);
-    shipLength -= 1;
+function shipCoordinates(grid, yAxis, xAxis, units, shipPlacement) {
+    let direction = Math.floor(Math.random() * 4);
+    for (let i = 1; i < units; i++) {
+      if (direction === 0 && (yAxis + 1) >= units) {
+        //up
+        shipPlacement.push(grid[yAxis - i][xAxis]);
+      } else if (direction === 1 && (grid.length - xAxis) >= units) {
+        //right
+        shipPlacement.push(grid[yAxis][xAxis + i]);
+      } else if (direction === 2 && (grid.length - yAxis) >= units) {
+        //down
+        shipPlacement.push(grid[yAxis + i][xAxis]);
+      } else if (direction === 3 && (xAxis + 1) >= units) {
+       //left
+       shipPlacement.push(grid[yAxis][xAxis - i])
+      } else {
+        return shipCoordinates(grid, yAxis, xAxis, units, shipPlacement); 
+      }
   }
   return shipPlacement;
-  
 }
+
+
+function gridLocation(grid) {
+  return Math.floor(Math.random() * grid.length);
+}
+
+
 
 function resetGrid() {
   grid = [];
-  console.log(grid);
   gridPlacementTracker = [];
   guessTracker = [];
   shipsRemaining = 2;
@@ -103,16 +121,16 @@ function gamePlay(grid) {
 function battleship(grid) {
   rs.keyIn(`Press any key to start the game!`);
   gridBuilder(10);
-  firstShip = setShip(grid, 2);
-  console.log(firstShip);
-  secondShip = setShip(grid, 3);
-  console.log(secondShip);
-  /*thirdShip = setShip(grid, 3);
-  console.log(thirdShip);
-  fourthShip = setShip(grid, 4);
-  console.log(fourthShip);
-  fifthShip = setShip(grid, 5);
-  console.log(fifthShip);*/
+  firstShip = setShip(grid, 2, gridPlacementTracker);
+  console.log(`ship: ${firstShip}`);
+  secondShip = setShip(grid, 3, gridPlacementTracker);
+  console.log(`ship: ${secondShip}`);
+  thirdShip = setShip(grid, 3, gridPlacementTracker);
+  console.log(`ship: ${thirdShip}`);
+  fourthShip = setShip(grid, 4, gridPlacementTracker);
+  console.log(`ship: ${fourthShip}`);
+  fifthShip = setShip(grid, 5, gridPlacementTracker);
+  console.log(`ship: ${fifthShip}`);
   return gamePlay(grid);
 }
 
