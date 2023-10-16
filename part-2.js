@@ -58,7 +58,7 @@ const shipCoordinates = (yAxis, xAxis, units, shipPlacement) => {
         shipPlacement.push(grid[yAxis + i][xAxis]);
       } else if (direction === 3 && (xAxis + 1) >= units) {
        //left
-       shipPlacement.push(grid[yAxis][xAxis - i])
+        shipPlacement.push(grid[yAxis][xAxis - i]);
       } else {
         return shipCoordinates(yAxis, xAxis, units, shipPlacement); 
       }
@@ -103,7 +103,6 @@ const hitShip = (shipUnits) => {
   return shipUnits;
 }
 
-
 const sunkenShip = () => {
   remainingShips -= 1;
   remainingShips === 1 ? console.log(`Hit! You have sunk a battleship. You have ${remainingShips} remaining ship.`) 
@@ -144,7 +143,7 @@ const battleship = () => {
   console.log(setShip(3));
   console.log(setShip(4));
   console.log(setShip(5));
-                                                                                  
+                                                                         
   return gamePlay();
 }
 
