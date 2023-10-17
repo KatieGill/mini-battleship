@@ -28,8 +28,8 @@ const printGrid = () => {
     const yHeaders = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`;
     let row = `${yHeaders[i]}  |`;
     for (let cell of grid[i]) {
-      //cell === '__S_|' ? row += `____|` : row += `${cell}`;
-      row += `${cell}`;
+      cell === '__S_|' ? row += `____|` : row += `${cell}`;
+      //row += `${cell}`;
     }
     console.log(row);
   }
@@ -55,26 +55,26 @@ const setShip = (units) => {
   placementValidator(units, gridPlacementTracker, shipPlacement);
   }
 
-  const gridLocation = (num) => Math.floor(Math.random() * num);
+const gridLocation = (num) => Math.floor(Math.random() * num);
 
-  const shipCoordinates = (yAxis, xAxis, units, shipPlacement) => {
-    let direction = gridLocation(4);
-    for (let i = 1; i < units; i++) {
-      if (direction === 0 && (yAxis + 1) >= units) {
-        //up
-        shipPlacement.push([yAxis - i, xAxis]);
-      } else if (direction === 1 && (grid.length - xAxis) >= units) {
-        //right
-        shipPlacement.push([yAxis, xAxis + i]);
-      } else if (direction === 2 && (grid.length - yAxis) >= units) {
-        //down
-        shipPlacement.push([yAxis + i, xAxis]);
-      } else if (direction === 3 && (xAxis + 1) >= units) {
-       //left
-        shipPlacement.push([yAxis, xAxis - i]);
-      } else {
-        return shipCoordinates(yAxis, xAxis, units, shipPlacement); 
-      }
+const shipCoordinates = (yAxis, xAxis, units, shipPlacement) => {
+  let direction = gridLocation(4);
+  for (let i = 1; i < units; i++) {
+    if (direction === 0 && (yAxis + 1) >= units) {
+      //up
+      shipPlacement.push([yAxis - i, xAxis]);
+    } else if (direction === 1 && (grid.length - xAxis) >= units) {
+      //right
+      shipPlacement.push([yAxis, xAxis + i]);
+    } else if (direction === 2 && (grid.length - yAxis) >= units) {
+      //down
+      shipPlacement.push([yAxis + i, xAxis]);
+    } else if (direction === 3 && (xAxis + 1) >= units) {
+      //left
+      shipPlacement.push([yAxis, xAxis - i]);
+    } else {
+      return shipCoordinates(yAxis, xAxis, units, shipPlacement); 
+    }
   }
   return shipPlacement;
 }
