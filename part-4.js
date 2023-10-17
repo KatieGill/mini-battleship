@@ -140,8 +140,10 @@ const guessResult = (guess, player1, player2) => {
   let coordinates = guessConvert(guess);
   const [y, x] = coordinates;
   const [first, second, third, fourth, fifth] = player2.gridPlacementTracker;
-  if (player1.guessTracker.includes(guess)) {
-    console.log(`${player1.name}, you have already picked this location. Miss!`);
+  if (player1.guessTracker.includes(guess) && player1.isOpponent) {
+      return gamePlay(player1, player2);
+  } else if (player1.guessTracker.includes(guess)) {
+      console.log(`${player1.name}, you have already picked this location. Miss!`);
   } else if (shipCheck(first, y, x)){
       player2.firstShipUnits = hitShip(player2.firstShipUnits, y, x, player1, player2);
   } else if (shipCheck(second, y, x)) {
@@ -201,7 +203,6 @@ const gamePlay = (player1, player2) => {
   let guess = "";
   if (player1.isOpponent) {
     guess = computerGuess(player1);
-    console.log(`${player1.name} guesses: ${guess}`);
   } else {
     guess = playerGuess(player1);
   }
