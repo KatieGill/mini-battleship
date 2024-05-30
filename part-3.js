@@ -1,10 +1,10 @@
-const rs = require('readline-sync');
+const rs = require("readline-sync");
 
 let grid = [];
 let gridPlacementTracker = [];
 let guessTracker = [];
 let remainingShips = 5;
-let firstShipUnits = 2
+let firstShipUnits = 2;
 let secondShipUnits = 3;
 let thirdShipUnits = 3;
 let fourthShipUnits = 4;
@@ -14,12 +14,12 @@ const gridBuilder = (num) => {
   for (let i = 0; i < num; i++) {
     const yAxis = [];
     for (let j = 0; j < num; j++) {
-      yAxis.push([`____|`])
+      yAxis.push([`____|`]);
     }
     grid.push(yAxis);
   }
   return grid;
-}
+};
 
 const printGrid = () => {
   const xHEaders = setHeaders(grid.length);
@@ -28,12 +28,12 @@ const printGrid = () => {
     const yHeaders = `ABCDEFGHIJKLMNOPQRSTUVWXYZ`;
     let row = `${yHeaders[i]}  |`;
     for (let cell of grid[i]) {
-      cell === '__S_|' ? row += `____|` : row += `${cell}`;
+      cell === "__S_|" ? (row += `____|`) : (row += `${cell}`);
       //row += `${cell}`;
     }
     console.log(row);
   }
-}
+};
 
 const setHeaders = (length) => {
   let header = `     `;
@@ -41,7 +41,7 @@ const setHeaders = (length) => {
     header += `${i}    `;
   }
   return header;
-}
+};
 
 const setShip = (units) => {
   const shipPlacement = [];
@@ -53,31 +53,31 @@ const setShip = (units) => {
   shipCoordinates(yAxis, xAxis, units, shipPlacement);
   //check if ship intersects other ships & place ship
   placementValidator(units, gridPlacementTracker, shipPlacement);
-  }
+};
 
 const gridLocation = (num) => Math.floor(Math.random() * num);
 
 const shipCoordinates = (yAxis, xAxis, units, shipPlacement) => {
   let direction = gridLocation(4);
   for (let i = 1; i < units; i++) {
-    if (direction === 0 && (yAxis + 1) >= units) {
+    if (direction === 0 && yAxis + 1 >= units) {
       //up
       shipPlacement.push([yAxis - i, xAxis]);
-    } else if (direction === 1 && (grid.length - xAxis) >= units) {
+    } else if (direction === 1 && grid.length - xAxis >= units) {
       //right
       shipPlacement.push([yAxis, xAxis + i]);
-    } else if (direction === 2 && (grid.length - yAxis) >= units) {
+    } else if (direction === 2 && grid.length - yAxis >= units) {
       //down
       shipPlacement.push([yAxis + i, xAxis]);
-    } else if (direction === 3 && (xAxis + 1) >= units) {
+    } else if (direction === 3 && xAxis + 1 >= units) {
       //left
       shipPlacement.push([yAxis, xAxis - i]);
     } else {
-      return shipCoordinates(yAxis, xAxis, units, shipPlacement); 
+      return shipCoordinates(yAxis, xAxis, units, shipPlacement);
     }
   }
   return shipPlacement;
-}
+};
 
 const placementValidator = (units, gridPlacementTracker, shipPlacement) => {
   for (let ship of gridPlacementTracker) {
@@ -93,17 +93,17 @@ const placementValidator = (units, gridPlacementTracker, shipPlacement) => {
   }
   gridPlacementTracker.push(shipPlacement);
   return assignShipCells(shipPlacement);
-}
+};
 
 const assignShipCells = (shipPlacement) => {
   for (let i = 0; i < shipPlacement.length; i++) {
     const [yAxis, xAxis] = shipPlacement[i];
-    grid[yAxis][xAxis] = '__S_|';
+    grid[yAxis][xAxis] = "__S_|";
   }
-}
+};
 
 const guessLimits = (length) => {
-  const yAxis = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const yAxis = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   const yAxisSliced = yAxis.slice(0, length);
   const limit = [];
   for (let letter of yAxisSliced) {
@@ -112,15 +112,14 @@ const guessLimits = (length) => {
     }
   }
   return limit;
-}
+};
 
 const playerGuess = () => {
   return rs.question(`Enter a location to strike, i.e. 'A2': `, {
     limit: guessLimits(grid.length),
     limitMessage: `That is not a valid location`,
-    caseSensitive: true
   });
-}
+};
 
 const guessResult = (guess) => {
   let coordinates = guessConvert(guess);
@@ -128,38 +127,38 @@ const guessResult = (guess) => {
   const [first, second, third, fourth, fifth] = gridPlacementTracker;
   if (guessTracker.includes(guess)) {
     console.log(`You have already picked this location. Miss!`);
-  } else if (shipCheck(first, y, x)){
-      firstShipUnits = hitShip(firstShipUnits, y, x);
+  } else if (shipCheck(first, y, x)) {
+    firstShipUnits = hitShip(firstShipUnits, y, x);
   } else if (shipCheck(second, y, x)) {
-      secondShipUnits = hitShip(secondShipUnits, y, x);
+    secondShipUnits = hitShip(secondShipUnits, y, x);
   } else if (shipCheck(third, y, x)) {
-      thirdShipUnits = hitShip(thirdShipUnits, y, x);
+    thirdShipUnits = hitShip(thirdShipUnits, y, x);
   } else if (shipCheck(fourth, y, x)) {
-      fourthShipUnits = hitShip(fourthShipUnits, y, x);
+    fourthShipUnits = hitShip(fourthShipUnits, y, x);
   } else if (shipCheck(fifth, y, x)) {
-      fifthShipUnits = hitShip(fifthShipUnits, y, x);
+    fifthShipUnits = hitShip(fifthShipUnits, y, x);
   } else {
-      console.log(`Miss!`);
-      grid[y][x] = '__O_|';
+    console.log(`Miss!`);
+    grid[y][x] = "__O_|";
   }
   if (!guessTracker.includes(guess)) {
     guessTracker.push(guess);
   }
-return printGrid();
-}
+  return printGrid();
+};
 
 const guessConvert = (guess) => {
   let y = guess.substring(0, 1);
   let x = guess.substring(1);
   let yAxis = alphaConvert(y);
-  let xAxis = x -= 1;
+  let xAxis = (x -= 1);
   return [yAxis, xAxis];
-}
+};
 
 const alphaConvert = (letter) => {
-  const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
   return alphabet.indexOf(letter);
-}
+};
 
 const shipCheck = (ship, y, x) => {
   for (let cell of ship) {
@@ -168,46 +167,55 @@ const shipCheck = (ship, y, x) => {
     }
   }
   return false;
-}
+};
 
 const hitShip = (shipUnits, y, x) => {
   shipUnits -= 1;
   shipUnits === 0 ? sunkenShip() : console.log(`Hit!`);
-  grid[y][x] = '__X_|';
+  grid[y][x] = "__X_|";
   return shipUnits;
-}
+};
 
 const sunkenShip = () => {
   remainingShips -= 1;
-  remainingShips === 1 ? console.log(`Hit! You have sunk a battleship. You have ${remainingShips} remaining ship.`) 
-                       : console.log(`Hit! You have sunk a battleship. You have ${remainingShips} remaining ships.`);
+  remainingShips === 1
+    ? console.log(
+        `Hit! You have sunk a battleship. You have ${remainingShips} remaining ship.`
+      )
+    : console.log(
+        `Hit! You have sunk a battleship. You have ${remainingShips} remaining ships.`
+      );
   return remainingShips;
-}
+};
 
 const resetGrid = () => {
   grid = [];
   gridPlacementTracker = [];
   guessTracker = [];
   remainingShips = 5;
-  firstShipUnits = 2
+  firstShipUnits = 2;
   secondShipUnits = 3;
   thirdShipUnits = 3;
   fourthShipUnits = 4;
   fifthShipUnits = 5;
   return battleship();
-}
+};
 
 const gamePlay = () => {
-  let guess = playerGuess();
+  let guess = playerGuess().toUpperCase();
   guessResult(guess);
   if (remainingShips === 0) {
-    if (rs.keyInYN(`You have destroyed all battleships. Would you like to play again?`)) {
+    if (
+      rs.keyInYN(
+        `You have destroyed all battleships. Would you like to play again?`
+      )
+    ) {
       return resetGrid();
     }
   } else {
     return gamePlay();
   }
-}
+};
 
 const battleship = () => {
   rs.keyIn(`Press any key to start the game!`);
@@ -217,12 +225,8 @@ const battleship = () => {
   setShip(3);
   setShip(4);
   setShip(5);
-  printGrid();                                                                     
+  printGrid();
   return gamePlay();
-}
+};
 
 battleship();
-
-
-
-
